@@ -40,7 +40,7 @@ postgresql:
   primary:
     persistence:
       storageClass: longhorn
-      size: 5Gi
+      size: 10Gi
 
 redis:
   deploy: true
@@ -50,7 +50,7 @@ redis:
   primary:
     persistence:
       storageClass: longhorn
-      size: 2Gi
+      size: 8Gi
 
 clickhouse:
   deploy: true
@@ -67,7 +67,7 @@ clickhouse:
     replicaCount: 1
     persistence:
       storageClass: longhorn
-      size: 2Gi
+      size: 5Gi
 
 s3:
   deploy: true
@@ -75,4 +75,4 @@ s3:
     existingSecret: langfuse-minio
   persistence:
     storageClass: longhorn
-    size: 5Gi
+    size: 10Gi
