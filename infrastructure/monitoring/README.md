@@ -11,6 +11,16 @@ Homelab defaults:
 - Grafana is exposed privately through Tailscale Ingress at `https://grafana.laperm-dragon.ts.net`.
 - Alertmanager is disabled by default to reduce resource use until alert routing is configured.
 
+## Dependency
+
+Sync monitoring only after Longhorn is healthy and the `longhorn` StorageClass exists:
+
+```sh
+kubectl get storageclass longhorn
+```
+
+The `homelab` AppProject allows `kube-system` because kube-prometheus-stack renders scrape resources there for control-plane components.
+
 ## Verify
 
 ```sh

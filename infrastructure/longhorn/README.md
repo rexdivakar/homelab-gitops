@@ -16,6 +16,16 @@ sudo apt install -y open-iscsi nfs-common
 sudo systemctl enable --now iscsid
 ```
 
+## First Sync
+
+For a fresh install through Argo CD, use the bootstrap helper:
+
+```sh
+scripts/bootstrap-longhorn.sh
+```
+
+Longhorn's chart includes a `pre-upgrade` hook. Argo CD maps Helm hooks into Argo CD sync hooks, so that hook can run as a `PreSync` Job even on a fresh Argo CD install and block the first sync before Longhorn service account/RBAC resources are ready. The bootstrap helper performs the first sync without hooks, then restores normal automated sync.
+
 ## Verify
 
 ```sh

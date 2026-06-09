@@ -33,6 +33,14 @@ To let Argo CD manage all infrastructure folders through the App-of-Apps pattern
 kubectl apply -f bootstrap/root-app.yaml
 ```
 
+For a fresh cluster, use the scripts to avoid the Longhorn first-sync hook trap and then sync monitoring after Longhorn creates the `longhorn` StorageClass:
+
+```sh
+scripts/check-cluster.sh
+scripts/bootstrap-longhorn.sh
+scripts/sync-apps.sh
+```
+
 Or apply individual apps manually:
 
 ```sh
@@ -53,6 +61,20 @@ sudo systemctl enable --now iscsid
 ```
 
 Longhorn works best with three or more nodes and replicated volumes. This repo configures Longhorn for a single-node homelab with one replica, which is practical for testing and local services but does not protect against node or disk failure.
+
+## Sync Ordering
+
+The root app uses Argo CD sync waves so Longhorn is created before monitoring:
+
+- `longhorn`: wave `10`
+- `monitoring`: wave `20`
+- Grafana Tailscale Ingress: wave `30`
+
+Monitoring uses Longhorn-backed PVCs. Do not sync monitoring until this succeeds:
+
+```sh
+kubectl get storageclass longhorn
+```
 
 ## Verify
 
@@ -75,6 +97,61 @@ Argo CD remains available privately through Tailscale at:
 ```text
 https://argocd.laperm-dragon.ts.net
 ```
+
+## Troubleshooting
+
+### Longhorn `longhorn-pre-upgrade` Hook Stuck
+
+Longhorn chart `pre-upgrade` hooks are rendered by Helm and interpreted by Argo CD as sync hooks. Argo CD hook behavior is phase-based: a failed `PreSync` hook stops the whole sync. Argo CD also documents that Helm `pre-upgrade` maps to `PreSync`, and Helm is only used to render manifests while Argo CD owns the lifecycle.
+
+On a fresh Longhorn install, the `longhorn-pre-upgrade` Job can run before Longhorn service account/RBAC/settings CRDs are ready and then block the application with:
+
+```text
+waiting for completion of hook batch/Job/longhorn-pre-upgrade
+```
+
+Use the bootstrap script for the first install:
+
+```sh
+scripts/bootstrap-longhorn.sh
+```
+
+The script temporarily disables Longhorn auto-sync, deletes any stuck `longhorn-pre-upgrade` Job, syncs Longhorn without hook execution, restores auto-sync, and verifies pods plus StorageClasses. With Argo CD CLIs that support `--skip-hooks`, it uses that flag. With the current `argocd v3.4.x` CLI, it uses selective sync and excludes `batch:Job:longhorn-system/longhorn-pre-upgrade`; Argo CD documents that hooks do not run during selective sync.
+
+### Longhorn Service Account Or RBAC Not Ready
+
+Symptoms:
+
+```text
+serviceaccount longhorn-service-account not found
+User system:serviceaccount:longhorn-system:longhorn-service-account cannot get resource settings.longhorn.io
+```
+
+These are first-install ordering symptoms from the pre-upgrade hook running too early. Run:
+
+```sh
+kubectl delete job -n longhorn-system longhorn-pre-upgrade --ignore-not-found=true
+scripts/bootstrap-longhorn.sh
+```
+
+### Monitoring Fails Before Longhorn Exists
+
+Monitoring uses `storageClassName: longhorn` for Prometheus and Grafana PVCs. If Longhorn is not installed yet, monitoring can remain `Missing` or `OutOfSync`.
+
+Verify Longhorn first:
+
+```sh
+kubectl get pods -n longhorn-system
+kubectl get storageclass longhorn
+```
+
+Then sync monitoring:
+
+```sh
+argocd app sync monitoring
+```
+
+`kube-prometheus-stack` also renders some control-plane scrape Services and ServiceMonitors in `kube-system`. The `homelab` AppProject allows `kube-system` for that reason.
 
 ## Security Notes
 
