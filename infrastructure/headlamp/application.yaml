@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp
+  namespace: argocd
+  annotations:
+    # Headlamp is independent of Longhorn/monitoring but should come after the
+    # foundational platform apps.
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  project: homelab
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/headlamp/
+      chart: headlamp
+      targetRevision: "*"
+      helm:
+        releaseName: headlamp
+        valueFiles:
+          - $values/infrastructure/headlamp/values.yaml
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      path: infrastructure/headlamp
+      directory:
+        include: headlamp-tailscale-ingress.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: headlamp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

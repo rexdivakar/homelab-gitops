@@ -10,12 +10,15 @@ spec:
     - https://github.com/rexdivakar/homelab-gitops.git
     - https://charts.longhorn.io
     - https://prometheus-community.github.io/helm-charts
+    - https://kubernetes-sigs.github.io/headlamp/
     - https://pkgs.tailscale.com/helmcharts
   destinations:
     - server: https://kubernetes.default.svc
       namespace: longhorn-system
     - server: https://kubernetes.default.svc
       namespace: monitoring
+    - server: https://kubernetes.default.svc
+      namespace: headlamp
     # kube-prometheus-stack creates Services and ServiceMonitors for Kubernetes
     # control-plane components in kube-system.
     - server: https://kubernetes.default.svc

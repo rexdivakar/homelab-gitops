@@ -98,6 +98,12 @@ Longhorn will be available privately through Tailscale at:
 https://longhorn.laperm-dragon.ts.net
 ```
 
+Headlamp will be available privately through Tailscale at:
+
+```text
+https://headlamp.laperm-dragon.ts.net
+```
+
 Argo CD remains available privately through Tailscale at:
 
 ```text
