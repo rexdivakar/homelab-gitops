@@ -19,7 +19,7 @@ spec:
           # Replace the Git repo URL below with your real repository URL.
           # This file is stored in Git next to this Application manifest.
           - $values/infrastructure/longhorn/values.yaml
-    - repoURL: https://github.com/YOUR_GITHUB_USER/homelab-gitops.git
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
       targetRevision: HEAD
       ref: values
   destination:
