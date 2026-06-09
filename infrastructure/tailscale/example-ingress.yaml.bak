@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-app-tailscale
+  namespace: default
+  annotations:
+    # Reuse this pattern for private tailnet exposure of ClusterIP services.
+    # Tailscale will expose this as:
+    # https://example-app.laperm-dragon.ts.net
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - example-app
+  rules:
+    - host: example-app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # Replace with a real ClusterIP service name.
+                name: example-app
+                port:
+                  number: 80

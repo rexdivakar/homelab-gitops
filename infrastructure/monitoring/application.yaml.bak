@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    # Sync after Longhorn so PVC-backed Prometheus and Grafana storage can bind.
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: homelab
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 61.*
+      helm:
+        releaseName: kube-prometheus-stack
+        valueFiles:
+          # Replace the Git repo URL below with your real repository URL.
+          # This file is stored in Git next to this Application manifest.
+          - $values/infrastructure/monitoring/values.yaml
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      path: infrastructure/monitoring
+      directory:
+        # Apply only the Grafana Tailscale Ingress from this folder. The Helm
+        # values file is consumed by the chart source above and must not be
+        # applied as a Kubernetes manifest.
+        include: grafana-tailscale-ingress.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

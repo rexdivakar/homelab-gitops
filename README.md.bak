@@ -14,7 +14,7 @@ Current assumptions:
 
 ## Repository URL Placeholder
 
-Replace every `https://github.com/rexdivakar/homelab-gitops.git` placeholder with the real GitHub repository URL before applying the Argo CD Applications.
+Replace every `https://github.com/YOUR_GITHUB_USER/homelab-gitops.git` placeholder with the real GitHub repository URL before applying the Argo CD Applications.
 
 ## Install Order
 

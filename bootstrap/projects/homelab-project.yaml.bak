@@ -7,7 +7,7 @@ spec:
   description: Single-node homelab GitOps project
   sourceRepos:
     # Replace this placeholder with your real GitHub repository URL.
-    - https://github.com/rexdivakar/homelab-gitops.git
+    - https://github.com/YOUR_GITHUB_USER/homelab-gitops.git
     - https://charts.longhorn.io
     - https://prometheus-community.github.io/helm-charts
     - https://pkgs.tailscale.com/helmcharts

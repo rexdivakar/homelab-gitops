@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-tailscale
+  namespace: argocd
+  annotations:
+    # Tailscale Ingress terminates HTTPS and forwards HTTP to argocd-server.
+    # Argo CD must be configured with server.insecure=true for this path.
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - argocd
+  rules:
+    - host: argocd
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80

@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+  annotations:
+    # Longhorn should install before monitoring because Prometheus and Grafana
+    # use Longhorn-backed PVCs in this repo.
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: homelab
+  sources:
+    - repoURL: https://charts.longhorn.io
+      chart: longhorn
+      targetRevision: 1.*
+      helm:
+        releaseName: longhorn
+        valueFiles:
+          # Replace the Git repo URL below with your real repository URL.
+          # This file is stored in Git next to this Application manifest.
+          - $values/infrastructure/longhorn/values.yaml
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
