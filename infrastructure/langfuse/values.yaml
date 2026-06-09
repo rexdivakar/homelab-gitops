@@ -1,0 +1,74 @@
+langfuse:
+  nextauth:
+    url: https://langfuse.laperm-dragon.ts.net
+    secret:
+      secretKeyRef:
+        name: langfuse-secrets
+        key: nextauth-secret
+  salt:
+    secretKeyRef:
+      name: langfuse-secrets
+      key: salt
+  encryptionKey:
+    secretKeyRef:
+      name: langfuse-secrets
+      key: encryption-key
+  auth:
+    disableUsernamePassword: false
+    providers:
+      keycloak:
+        clientId: langfuse
+        clientSecret:
+          secretKeyRef:
+            name: langfuse-secrets
+            key: keycloak-client-secret
+        issuer: https://keycloak.laperm-dragon.ts.net/realms/homelab
+  deployment:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+postgresql:
+  deploy: true
+  auth:
+    existingSecret: langfuse-postgresql
+  primary:
+    persistence:
+      storageClass: longhorn
+      size: 10Gi
+
+redis:
+  deploy: true
+  auth:
+    existingSecret: langfuse-redis
+    existingSecretPasswordKey: password
+
+clickhouse:
+  deploy: true
+  auth:
+    existingSecret: langfuse-clickhouse
+    existingSecretKey: password
+  replicaCount: 1
+  shards: 1
+  resourcesPreset: small
+  persistence:
+    storageClass: longhorn
+    size: 10Gi
+  zookeeper:
+    replicaCount: 1
+    persistence:
+      storageClass: longhorn
+      size: 5Gi
+
+s3:
+  deploy: true
+  auth:
+    existingSecret: langfuse-minio
+  persistence:
+    storageClass: longhorn
+    size: 10Gi

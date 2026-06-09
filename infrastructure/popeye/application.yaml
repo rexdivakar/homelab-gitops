@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: popeye
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "40"
+spec:
+  project: homelab
+  source:
+    repoURL: https://github.com/rexdivakar/homelab-gitops.git
+    targetRevision: HEAD
+    path: infrastructure/popeye
+    directory:
+      include: popeye-cronjob.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: popeye
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

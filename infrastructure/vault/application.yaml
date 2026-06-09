@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "16"
+spec:
+  project: homelab
+  sources:
+    - repoURL: https://helm.releases.hashicorp.com
+      chart: vault
+      targetRevision: "*"
+      helm:
+        releaseName: vault
+        valueFiles:
+          - $values/infrastructure/vault/values.yaml
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      path: infrastructure/vault
+      directory:
+        include: vault-tailscale-ingress.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

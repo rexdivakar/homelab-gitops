@@ -37,6 +37,7 @@ For a fresh cluster, use the scripts to avoid the Longhorn first-sync hook trap 
 
 ```sh
 scripts/check-cluster.sh
+scripts/create-platform-secrets.sh
 scripts/bootstrap-longhorn.sh
 scripts/sync-apps.sh
 ```
@@ -66,9 +67,16 @@ Longhorn works best with three or more nodes and replicated volumes. This repo c
 
 The root app uses Argo CD sync waves so Longhorn is created before monitoring:
 
+- `cert-manager`: wave `5`
+- `cloudnative-pg`: wave `6`
 - `longhorn`: wave `10`
+- `keycloak`: wave `15`
+- `vault`: wave `16`
 - `monitoring`: wave `20`
+- `headlamp`: wave `25`
+- `langfuse`: wave `25`
 - Grafana Tailscale Ingress: wave `30`
+- `popeye`: wave `40`
 
 Monitoring uses Longhorn-backed PVCs. Do not sync monitoring until this succeeds:
 
@@ -104,11 +112,62 @@ Headlamp will be available privately through Tailscale at:
 https://headlamp.laperm-dragon.ts.net
 ```
 
+Keycloak will be available privately through Tailscale at:
+
+```text
+https://keycloak.laperm-dragon.ts.net
+```
+
+Vault will be available privately through Tailscale at:
+
+```text
+https://vault.laperm-dragon.ts.net
+```
+
+Langfuse will be available privately through Tailscale at:
+
+```text
+https://langfuse.laperm-dragon.ts.net
+```
+
 Argo CD remains available privately through Tailscale at:
 
 ```text
 https://argocd.laperm-dragon.ts.net
 ```
+
+## Platform Apps
+
+This repo includes Argo CD Applications for:
+
+- `cert-manager`: certificate controller and CRDs.
+- `cloudnative-pg`: PostgreSQL operator.
+- `keycloak`: private identity provider for UI apps.
+- `vault`: private Vault UI and standalone file-backed server for a single-node lab.
+- `langfuse`: private Langfuse deployment with Longhorn-backed dependencies.
+- `popeye`: nightly cluster report CronJob.
+- `devspace`: documented as a local CLI workflow, not a cluster service.
+
+Create the required in-cluster generated secrets before syncing Keycloak or Langfuse:
+
+```sh
+scripts/create-platform-secrets.sh
+```
+
+The script generates Kubernetes Secrets in the cluster only. It does not write secret values into Git.
+
+### Keycloak Integration Scope
+
+Keycloak can be used by apps that have an HTTP login or OIDC/SAML support. It is not something cert-manager, CloudNativePG, Popeye, or DevSpace "log into":
+
+- Keycloak itself is the identity provider.
+- Argo CD can use Keycloak through Argo CD OIDC settings and RBAC config.
+- Grafana can use Keycloak through generic OAuth.
+- Vault can use Keycloak through the Vault OIDC auth method after Vault is initialized and unsealed.
+- Langfuse is configured to point at the `homelab` Keycloak realm, but its client secret must be replaced after creating the Keycloak client.
+- Headlamp per-user login requires Kubernetes API OIDC integration or an auth proxy, because Headlamp needs Kubernetes API credentials that map to Kubernetes RBAC.
+
+Create a Keycloak realm named `homelab`, then create clients for each UI app you want to authenticate through Keycloak. Use private redirect URLs under `*.laperm-dragon.ts.net`.
 
 ## Troubleshooting
 

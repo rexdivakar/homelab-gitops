@@ -11,13 +11,24 @@ require_cmd() {
 require_cmd kubectl
 require_cmd argocd
 
+sync_and_wait() {
+  local app="$1"
+  local timeout="${2:-900}"
+
+  echo "Syncing ${app}..."
+  argocd app sync "${app}" --prune --timeout "${timeout}"
+  argocd app wait "${app}" --health --sync --timeout "${timeout}"
+}
+
 echo "Syncing homelab-root..."
 argocd app sync homelab-root --prune --timeout 600
 argocd app wait homelab-root --health --sync --timeout 600
 
-echo "Syncing longhorn..."
+sync_and_wait cert-manager 900
+sync_and_wait cloudnative-pg 900
+
 if kubectl get storageclass longhorn >/dev/null 2>&1; then
-  argocd app sync longhorn --prune --timeout 900
+  sync_and_wait longhorn 900
 else
   "$(dirname "$0")/bootstrap-longhorn.sh"
 fi
@@ -25,6 +36,9 @@ fi
 echo "Waiting for Longhorn storageClass..."
 kubectl wait --for=jsonpath='{.metadata.name}'=longhorn storageclass/longhorn --timeout=300s
 
-echo "Syncing monitoring..."
-argocd app sync monitoring --prune --timeout 900
-argocd app wait monitoring --health --sync --timeout 900
+sync_and_wait keycloak 900
+sync_and_wait vault 900
+sync_and_wait monitoring 900
+sync_and_wait headlamp 900
+sync_and_wait langfuse 1200
+sync_and_wait popeye 600

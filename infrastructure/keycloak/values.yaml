@@ -1,0 +1,28 @@
+auth:
+  adminUser: admin
+  existingSecret: keycloak-admin
+  passwordSecretKey: admin-password
+
+production: false
+proxyHeaders: xforwarded
+
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: keycloak-postgresql
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+      replicationPasswordKey: replication-password
+  primary:
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 8Gi
+
+resourcesPreset: small
