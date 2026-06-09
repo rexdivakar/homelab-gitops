@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-root
+  namespace: argocd
+  annotations:
+    # The root app is applied after the homelab AppProject exists.
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: homelab
+  source:
+    # Replace this placeholder with your real GitHub repository URL.
+    repoURL: https://github.com/YOUR_GITHUB_USER/homelab-gitops.git
+    targetRevision: HEAD
+    # Recursively sync infrastructure manifests, including child Argo CD Applications
+    # and the intentional Argo CD Tailscale Ingress. This include list avoids
+    # applying Helm values files, README files, and optional example/test manifests.
+    path: infrastructure
+    directory:
+      recurse: true
+      include: "{*/application.yaml,tailscale/argocd-ingress.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
