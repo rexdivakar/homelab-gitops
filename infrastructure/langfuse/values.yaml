@@ -47,10 +47,6 @@ redis:
   auth:
     existingSecret: langfuse-redis
     existingSecretPasswordKey: password
-  primary:
-    persistence:
-      storageClass: longhorn
-      size: 8Gi
 
 clickhouse:
   deploy: true
