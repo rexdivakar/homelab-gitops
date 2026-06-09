@@ -40,13 +40,17 @@ postgresql:
   primary:
     persistence:
       storageClass: longhorn
-      size: 10Gi
+      size: 5Gi
 
 redis:
   deploy: true
   auth:
     existingSecret: langfuse-redis
     existingSecretPasswordKey: password
+  primary:
+    persistence:
+      storageClass: longhorn
+      size: 2Gi
 
 clickhouse:
   deploy: true
@@ -58,12 +62,12 @@ clickhouse:
   resourcesPreset: small
   persistence:
     storageClass: longhorn
-    size: 10Gi
+    size: 2Gi
   zookeeper:
     replicaCount: 1
     persistence:
       storageClass: longhorn
-      size: 5Gi
+      size: 2Gi
 
 s3:
   deploy: true
@@ -71,4 +75,4 @@ s3:
     existingSecret: langfuse-minio
   persistence:
     storageClass: longhorn
-    size: 10Gi
+    size: 5Gi
