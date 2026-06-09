@@ -26,6 +26,14 @@ scripts/bootstrap-longhorn.sh
 
 Longhorn's chart includes a `pre-upgrade` hook. Argo CD maps Helm hooks into Argo CD sync hooks, so that hook can run as a `PreSync` Job even on a fresh Argo CD install and block the first sync before Longhorn service account/RBAC resources are ready. The bootstrap helper performs the first sync without hooks, then restores normal automated sync.
 
+## UI
+
+The Longhorn service remains `ClusterIP` and is exposed only through private Tailscale Ingress:
+
+```text
+https://longhorn.laperm-dragon.ts.net
+```
+
 ## Verify
 
 ```sh

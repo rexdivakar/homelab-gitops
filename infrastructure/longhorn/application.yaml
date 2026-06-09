@@ -22,6 +22,14 @@ spec:
     - repoURL: https://github.com/rexdivakar/homelab-gitops.git
       targetRevision: HEAD
       ref: values
+    - repoURL: https://github.com/rexdivakar/homelab-gitops.git
+      targetRevision: HEAD
+      path: infrastructure/longhorn
+      directory:
+        # Apply only the Longhorn Tailscale Ingress from this folder. The Helm
+        # values file is consumed by the chart source above and must not be
+        # applied as a Kubernetes manifest.
+        include: longhorn-tailscale-ingress.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system

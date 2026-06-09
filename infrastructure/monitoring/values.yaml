@@ -65,6 +65,9 @@ kube-state-metrics:
       memory: 128Mi
 
 prometheus-node-exporter:
+  # The Debian node may already run a host-level node_exporter on port 9100.
+  # Keep this chart's exporter on the pod network to avoid host port conflicts.
+  hostNetwork: false
   resources:
     requests:
       cpu: 25m

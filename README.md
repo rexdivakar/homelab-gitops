@@ -92,6 +92,12 @@ Grafana will be available privately through Tailscale at:
 https://grafana.laperm-dragon.ts.net
 ```
 
+Longhorn will be available privately through Tailscale at:
+
+```text
+https://longhorn.laperm-dragon.ts.net
+```
+
 Argo CD remains available privately through Tailscale at:
 
 ```text

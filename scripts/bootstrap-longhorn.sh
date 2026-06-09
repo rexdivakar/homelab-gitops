@@ -47,7 +47,7 @@ sync_without_hooks() {
 }
 
 echo "Temporarily disabling auto-sync for ${APP_NAME}..."
-argocd app set "${APP_NAME}" --sync-policy manual
+kubectl patch application "${APP_NAME}" -n argocd --type merge -p '{"spec":{"syncPolicy":null}}'
 
 echo "Deleting stuck ${NAMESPACE}/${HOOK_JOB} Job if it exists..."
 kubectl delete job -n "${NAMESPACE}" "${HOOK_JOB}" --ignore-not-found=true
@@ -56,7 +56,7 @@ echo "Syncing ${APP_NAME} without hook execution for the fresh install..."
 sync_without_hooks
 
 echo "Restoring auto-sync for ${APP_NAME}..."
-argocd app set "${APP_NAME}" --sync-policy automated --auto-prune --self-heal
+kubectl patch application "${APP_NAME}" -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true},"syncOptions":["CreateNamespace=true","ServerSideApply=true","SkipDryRunOnMissingResource=true"]}}}'
 
 echo "Longhorn pods:"
 kubectl get pods -n "${NAMESPACE}"
