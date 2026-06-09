@@ -3,6 +3,11 @@ auth:
   existingSecret: keycloak-admin
   passwordSecretKey: admin-password
 
+image:
+  registry: docker.io
+  repository: bitnamilegacy/keycloak
+  tag: 26.3.3-debian-12-r0
+
 production: false
 proxyHeaders: xforwarded
 

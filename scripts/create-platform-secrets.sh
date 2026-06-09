@@ -44,7 +44,7 @@ kubectl create secret generic langfuse-redis \
 
 kubectl create secret generic langfuse-clickhouse \
   -n langfuse \
-  --from-literal=password="$(rand_b64 24)" \
+  --from-literal=password="$(rand_hex 24)" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl create secret generic langfuse-minio \
